@@ -3,24 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.cdnfonts.com/css/general-sans?styles=135312" rel="stylesheet">
+    <link href="https://fonts.cdnfonts.com/css/arcade-classic" rel="stylesheet">
+    <link rel="stylesheet" href="./style.css">
+
     <title>Rotating Wireframe Spheres</title>
-    <style>
-        body { margin: 0; overflow: hidden; }
-        canvas { display: block; }
-        #title {
-            position: absolute;
-            color: white;
-            background-color: rgba(0, 0, 0, 0.5);
-            padding: 5px;
-            border-radius: 5px;
-            display: none;
-            pointer-events: none;
-            font-family: Arial, sans-serif;
-        }
-    </style>
 </head>
 <body>
   <div id="title"></div>
+  <div id="info"></div>
   <video id="background_video" loop muted>
     <source src="/background.mp4" type="video/mp4">
   </video>

@@ -1,0 +1,14 @@
+{
+    "spheres": [
+        {
+            "id": "sphere4",
+            "name": "Competitions",
+            "info": "Information about competitions."
+        },
+        {
+            "id": "sphere5",
+            "name": "Contact",
+            "info": "Information about contact."
+        }
+    ]
+}

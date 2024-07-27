@@ -1,12 +1,5 @@
-canvas {
-  display: block;
-}
-
-body { 
-  margin: 0; 
-  overflow: hidden; 
-}
-
+body { margin: 0; overflow: hidden; }
+canvas { display: block; }
 #title {
     position: absolute;
     color: white;
@@ -18,6 +11,87 @@ body {
     font-family: Arial, sans-serif;
 }
 
-#background_video {
+#background_video { display: none; }
+
+#info {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 33.33%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
   display: none;
+  padding: 20px;
+  overflow-y: auto;
+  box-sizing: border-box;
+  z-index: 1000;
+}
+
+#buttonbox{
+  position: absolute;
+  bottom: 0px;
+  left: 0;
+  width: 100%;
+  height: 14%;
+  background-color: #dddddd;
+  border-radius: 10px;
+}
+
+#info button {
+  font-family: 'ArcadeClassic', sans-serif;
+  font-size: 22px;
+  display: block;
+  width: 45%;
+  height: 9%;
+  margin: 10px 0;
+  padding: 10px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+  border-radius: 8px;
+}
+
+h2{
+  font-family: 'ArcadeClassic', sans-serif;
+  font-size: 40px;
+}
+
+p{
+  font-family: 'General Sans', sans-serif;
+}
+
+/* Styling for prevBtn */
+#prevBtn {
+  background-color: #ff0000;
+  color: #ffffff;
+  position: absolute;
+  bottom: 6px;
+  left: 10px;
+}
+#prevBtn:hover {
+  background-color: #aa0000;
+  transform: scale(1.05);
+}
+
+/* Styling for nextBtn */
+#nextBtn {
+  background-color: #007bff;
+  color: #fff;
+  position: absolute;
+  bottom: 6px;
+  right: 10px;
+}
+#nextBtn:hover {
+  background-color: #0040a1;
+  transform: scale(1.05);
+}
+
+#moreBtn{
+  background-color: #ffb800;
+  color: #ffffff;
+}
+#moreBtn:hover {
+  background-color: #c48d00;
+  transform: scale(1.05);
 }
