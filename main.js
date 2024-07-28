@@ -1,7 +1,7 @@
-import * as THREE from 'node_modules/three';
-import { OrbitControls } from 'node_modules/three/examples/jsm/controls/OrbitControls';
-import 'style.css';
-import TWEEN from 'node_modules/@tweenjs/tween.js';
+import * as THREE from './node_modules/three';
+import { OrbitControls } from './node_modules/three/examples/jsm/controls/OrbitControls';
+import './style.css';
+import TWEEN from './node_modules/@tweenjs/tween.js';
 
 let scene, camera, renderer, controls, effectComposer, customPass;
 let sphere1, sphere2, sphere3, sphere4, sphere5;
