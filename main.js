@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import './style.css';
+import '/style.css';
 import TWEEN from '@tweenjs/tween.js';
 
 let scene, camera, renderer, controls;
