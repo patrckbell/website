@@ -2,13 +2,12 @@ body { margin: 0; overflow: hidden; }
 canvas { display: block; }
 #title {
     position: absolute;
-    color: white;
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: rgba(0, 0, 0, 0);
     padding: 5px;
     border-radius: 5px;
     display: none;
     pointer-events: none;
-    font-family: Arial, sans-serif;
+    font-family: 'ArcadeClassic', sans-serif;
 }
 
 #background_video { display: none; }

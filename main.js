@@ -2,8 +2,11 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import '/style.css';
 import TWEEN from '@tweenjs/tween.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 
-let scene, camera, renderer, controls;
+let scene, camera, renderer, controls, effectComposer, customPass;
 let sphere1, sphere2, sphere3, sphere4, sphere5;
 let angle = 0;
 let mouseX = 0, mouseY = 0;
@@ -12,8 +15,15 @@ let selectedSphere = null;
 const titleElement = document.getElementById('title');
 const infoElement = document.getElementById('info');
 
-const video = document.getElementById('background_video');
-const texture = new THREE.VideoTexture(video);
+const loader = new THREE.CubeTextureLoader();
+const texture = loader.load([
+  '/zpos.png',  // right
+  '/zpos.png',   // left
+  '/zpos.png',    // top
+  '/zpos.png', // bottom
+  '/zpos.png',  // front
+  '/zpos.png'   // back
+]);
 
 const spheres = [];
 let currentSphereIndex = -1;
@@ -23,14 +33,13 @@ init();
 animate();
 
 function init() {
-    video.play();
     // Create the scene
     scene = new THREE.Scene();
     scene.background = texture;
 
     // Create the camera
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.z = 50;
+    camera.position.z = 40;
 
     // Create the renderer
     renderer = new THREE.WebGLRenderer({ alpha: true });
@@ -97,6 +106,7 @@ function init() {
 
     // Add OrbitControls
     controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableZoom = false;
 
     // Handle mouse events
     document.addEventListener('mousemove', onDocumentMouseMove, false);
@@ -120,32 +130,59 @@ function onDocumentMouseClick(event) {
 
     if (intersects.length > 0) {
         selectedSphere = intersects[0].object;
-        currentSphereIndex = spheres.indexOf(selectedSphere);
-        const sphereData = selectedSphere.userData;
+        if(selectedSphere != sphere3){
+            currentSphereIndex = spheres.indexOf(selectedSphere);
+            const sphereData = selectedSphere.userData;
 
-        document.removeEventListener('mousemove', onDocumentMouseMove, false);
+            document.removeEventListener('mousemove', onDocumentMouseMove, false);
 
-        // Animate zoom in on the selected sphere
-        new TWEEN.Tween(camera.position)
-            .to({ x: selectedSphere.position.x, y: selectedSphere.position.y, z: selectedSphere.position.z + 5 }, 1000)
-            .easing(TWEEN.Easing.Quadratic.Out)
-            .start();
+            // Animate zoom in on the selected sphere
+            new TWEEN.Tween(camera.position)
+                .to({ x: selectedSphere.position.x, y: selectedSphere.position.y, z: selectedSphere.position.z + 5 }, 1000)
+                .easing(TWEEN.Easing.Quadratic.Out)
+                .start();
 
-        new TWEEN.Tween(controls.target)
-            .to({ x: selectedSphere.position.x, y: selectedSphere.position.y, z: selectedSphere.position.z }, 1000)
-            .easing(TWEEN.Easing.Quadratic.Out)
-            .start();
+            new TWEEN.Tween(controls.target)
+                .to({ x: selectedSphere.position.x, y: selectedSphere.position.y, z: selectedSphere.position.z }, 1000)
+                .easing(TWEEN.Easing.Quadratic.Out)
+                .start();
 
-        controls.update();
+            controls.update();
 
-        // Display the info box
-        const sphereId = Object.keys(sphereData).find(id => sphereData[id] === selectedSphere.userData);
-        const sphereInfo = sphereId ? sphereData[sphereId] : sphereData;
+            // Display the info box
+            const sphereId = Object.keys(sphereData).find(id => sphereData[id] === selectedSphere.userData);
+            const sphereInfo = sphereId ? sphereData[sphereId] : sphereData;
 
-        infoElement.style.display = 'block';
-        infoElement.innerHTML = `<h2>${sphereInfo.name}</h2><p>${sphereInfo.info}</p><button id="moreBtn">See More</button><div id="buttonbox"></div><button id="prevBtn">Previous</button><button id="nextBtn">Next</button>`;
-        document.getElementById('prevBtn').addEventListener('click', showPreviousSphere);
-        document.getElementById('nextBtn').addEventListener('click', showNextSphere);
+            infoElement.style.display = 'block';
+            infoElement.innerHTML = `
+            <h2>${sphereInfo.name}</h2>
+            <p>${sphereInfo.info}</p>
+            <button id="moreBtn" class="${sphereInfo.name}">See More</button>
+            <div id="buttonbox"></div>
+            <button id="prevBtn">Previous</button>
+            <button id="nextBtn">Next</button>
+            `;
+            
+            document.getElementById('prevBtn').addEventListener('click', showPreviousSphere);
+            document.getElementById('nextBtn').addEventListener('click', showNextSphere);
+            
+            const moreBtn = document.getElementById('moreBtn');
+            moreBtn.addEventListener('click', function() {
+                if (moreBtn.classList.contains("About")) {
+                    window.location.href = 'about.html';
+                }
+                if (moreBtn.classList.contains("Contact")) {
+                    window.location.href = 'contact.html';
+                }
+                if (moreBtn.classList.contains("Projects")) {
+                    window.location.href = 'projects.html';
+                }
+                if (moreBtn.classList.contains("Competitions")) {
+                    window.location.href = 'competitons.html';
+                }
+            });
+        
+        }
     }
 }
 
@@ -214,9 +251,34 @@ function updateView() {
     const sphereId = Object.keys(sphereData).find(id => sphereData[id] === selectedSphere.userData);
     const sphereInfo = sphereId ? sphereData[sphereId] : sphereData;
 
-    infoElement.innerHTML = `<h2>${sphereInfo.name}</h2><p>${sphereInfo.info}</p><button id="moreBtn">See More</button><div id="buttonbox"></div><button id="prevBtn">Previous</button><button id="nextBtn">Next</button>`;
+    infoElement.innerHTML = `
+    <h2>${sphereInfo.name}</h2>
+    <p>${sphereInfo.info}</p>
+    <button id="moreBtn" class="${sphereInfo.name}">See More</button>
+    <div id="buttonbox"></div>
+    <button id="prevBtn">Previous</button>
+    <button id="nextBtn">Next</button>
+    `;
+    
     document.getElementById('prevBtn').addEventListener('click', showPreviousSphere);
     document.getElementById('nextBtn').addEventListener('click', showNextSphere);
+    
+    const moreBtn = document.getElementById('moreBtn');
+    moreBtn.addEventListener('click', function() {
+        if (moreBtn.classList.contains("About")) {
+            window.location.href = 'about.html';
+        }
+        if (moreBtn.classList.contains("Contact")) {
+            window.location.href = 'contact.html';
+        }
+        if (moreBtn.classList.contains("Projects")) {
+            window.location.href = 'projects.html';
+        }
+        if (moreBtn.classList.contains("Competitions")) {
+            window.location.href = 'competitons.html';
+        }
+    });
+
 }
 
 function animate() {
@@ -224,10 +286,13 @@ function animate() {
 
     TWEEN.update();  // Ensure TWEEN animations are updated
 
+    const offset = -2
+
     if (selectedSphere) {
-        camera.position.set(selectedSphere.position.x, selectedSphere.position.y, selectedSphere.position.z + 5);
-        controls.target.copy(selectedSphere.position);
+        camera.position.set(selectedSphere.position.x - offset, selectedSphere.position.y, selectedSphere.position.z + 5);
+        controls.target.set(selectedSphere.position.x - offset, selectedSphere.position.y, selectedSphere.position.z);
         controls.update();
+        titleElement.style.display = 'none';
     }
 
     // Rotate the spheres
@@ -257,12 +322,6 @@ function animate() {
     sphere5.position.x = -radius * 0.75 * Math.cos(angle);
     sphere5.position.y = -radius * 0.5 * Math.sin(angle);
 
-    // Update the scale based on hover state
-    sphere1.scale.set(mouseOver1 ? 1.5 : 1, mouseOver1 ? 1.5 : 1, mouseOver1 ? 1.5 : 1);
-    sphere2.scale.set(mouseOver2 ? 1.5 : 1, mouseOver2 ? 1.5 : 1, mouseOver2 ? 1.5 : 1);
-    sphere4.scale.set(mouseOver4 ? 1.5 : 1, mouseOver4 ? 1.5 : 1, mouseOver4 ? 1.5 : 1);
-    sphere5.scale.set(mouseOver5 ? 1.5 : 1, mouseOver5 ? 1.5 : 1, mouseOver5 ? 1.5 : 1);
-
     // Raycasting for hover detection
     const vector = new THREE.Vector3(mouseX, mouseY, 0.5).unproject(camera);
     const raycaster = new THREE.Raycaster(camera.position, vector.sub(camera.position).normalize());
@@ -278,46 +337,55 @@ function animate() {
 
     // Position the title element
     const rect = renderer.domElement.getBoundingClientRect();
-    if (mouseOver1) {
-        const sphere1ScreenPosition = sphere1.position.clone().project(camera);
-        const screenX = ((sphere1ScreenPosition.x + 1) / 2) * rect.width + rect.left;
-        const screenY = ((-sphere1ScreenPosition.y + 1) / 2) * rect.height + rect.top;
+    if(!selectedSphere){
+        sphere1.scale.set(mouseOver1 ? 1.5 : 1, mouseOver1 ? 1.5 : 1, mouseOver1 ? 1.5 : 1);
+        sphere2.scale.set(mouseOver2 ? 1.5 : 1, mouseOver2 ? 1.5 : 1, mouseOver2 ? 1.5 : 1);
+        sphere4.scale.set(mouseOver4 ? 1.5 : 1, mouseOver4 ? 1.5 : 1, mouseOver4 ? 1.5 : 1);
+        sphere5.scale.set(mouseOver5 ? 1.5 : 1, mouseOver5 ? 1.5 : 1, mouseOver5 ? 1.5 : 1);
+        if (mouseOver1) {
+            const sphere1ScreenPosition = sphere1.position.clone().project(camera);
+            const screenX = ((sphere1ScreenPosition.x + 1) / 2) * rect.width + rect.left;
+            const screenY = ((-sphere1ScreenPosition.y + 1) / 2) * rect.height + rect.top;
 
-        titleElement.style.display = 'block';
-        titleElement.innerHTML = 'Projects';
-        titleElement.style.left = `${screenX}px`;
-        titleElement.style.top = `${screenY - 20}px`; // Adjusted position to be above the element
-    } else if (mouseOver2) {
-        const sphere2ScreenPosition = sphere2.position.clone().project(camera);
-        const screenX = ((sphere2ScreenPosition.x + 1) / 2) * rect.width + rect.left;
-        const screenY = ((-sphere2ScreenPosition.y + 1) / 2) * rect.height + rect.top;
+            titleElement.style.display = 'block';
+            titleElement.innerHTML = 'Projects';
+            titleElement.style.left = `${screenX + 12}px`;
+            titleElement.style.top = `${screenY - 20}px`; // Adjusted position to be above the element
+            titleElement.style.color = `#0066ff`;
+        } else if (mouseOver2) {
+            const sphere2ScreenPosition = sphere2.position.clone().project(camera);
+            const screenX = ((sphere2ScreenPosition.x + 1) / 2) * rect.width + rect.left;
+            const screenY = ((-sphere2ScreenPosition.y + 1) / 2) * rect.height + rect.top;
 
-        titleElement.style.display = 'block';
-        titleElement.innerHTML = 'About Me';
-        titleElement.style.left = `${screenX}px`;
-        titleElement.style.top = `${screenY - 20}px`; // Adjusted position to be above the element
-    } else if (mouseOver4) {
-        const sphere4ScreenPosition = sphere4.position.clone().project(camera);
-        const screenX = ((sphere4ScreenPosition.x + 1) / 2) * rect.width + rect.left;
-        const screenY = ((-sphere4ScreenPosition.y + 1) / 2) * rect.height + rect.top;
+            titleElement.style.display = 'block';
+            titleElement.innerHTML = 'About Me';
+            titleElement.style.left = `${screenX+12}px`;
+            titleElement.style.top = `${screenY - 20}px`; // Adjusted position to be above the element
+            titleElement.style.color = `#ff0000`;
+        } else if (mouseOver4) {
+            const sphere4ScreenPosition = sphere4.position.clone().project(camera);
+            const screenX = ((sphere4ScreenPosition.x + 1) / 2) * rect.width + rect.left;
+            const screenY = ((-sphere4ScreenPosition.y + 1) / 2) * rect.height + rect.top;
 
-        titleElement.style.display = 'block';
-        titleElement.innerHTML = 'Competitions';
-        titleElement.style.left = `${screenX}px`;
-        titleElement.style.top = `${screenY - 20}px`; // Adjusted position to be above the element
-    } else if (mouseOver5) {
-        const sphere5ScreenPosition = sphere5.position.clone().project(camera);
-        const screenX = ((sphere5ScreenPosition.x + 1) / 2) * rect.width + rect.left;
-        const screenY = ((-sphere5ScreenPosition.y + 1) / 2) * rect.height + rect.top;
+            titleElement.style.display = 'block';
+            titleElement.innerHTML = 'Competitions';
+            titleElement.style.left = `${screenX+12}px`;
+            titleElement.style.top = `${screenY - 20}px`; // Adjusted position to be above the element
+            titleElement.style.color = `#ffb800`;
+        } else if (mouseOver5) {
+            const sphere5ScreenPosition = sphere5.position.clone().project(camera);
+            const screenX = ((sphere5ScreenPosition.x + 1) / 2) * rect.width + rect.left;
+            const screenY = ((-sphere5ScreenPosition.y + 1) / 2) * rect.height + rect.top;
 
-        titleElement.style.display = 'block';
-        titleElement.innerHTML = 'Contact';
-        titleElement.style.left = `${screenX}px`;
-        titleElement.style.top = `${screenY - 20}px`; // Adjusted position to be above the element
-    } else {
-        titleElement.style.display = 'none';
+            titleElement.style.display = 'block';
+            titleElement.innerHTML = 'Contact';
+            titleElement.style.left = `${screenX+12}px`;
+            titleElement.style.top = `${screenY - 20}px`; // Adjusted position to be above the element
+            titleElement.style.color = `#ff5c00`;
+        } else {
+            titleElement.style.display = 'none';
+        }
     }
-
     // Render the scene
     renderer.render(scene, camera);
 }
