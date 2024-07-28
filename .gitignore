@@ -7,20 +7,7 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules/.bin
-node_modules/.vite
-node_modules/@esbuild
-node_modules/@rollup
-node_modules/@types
-node_modules/esbuild
-node_modules/fsevents
-node_modules/nanoid
-node_modules/picocolors
-node_modules/postcss
-node_modules/rollup
-node_modules/source-map-js
-node_modules/vite
-node_modules/.package-lock.json
+node_modules
 dist
 dist-ssr
 *.local
