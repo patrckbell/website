@@ -1,6 +1,6 @@
 import * as THREE from './three/src/Three.js';
 import { OrbitControls } from './three/examples/jsm/controls/OrbitControls.js';
-import TWEEN from './@tweenjs/tween.js';
+import TWEEN from './@tweenjs/tween.js/dist/tween.esm.js';
 
 let scene, camera, renderer, controls, effectComposer, customPass;
 let sphere1, sphere2, sphere3, sphere4, sphere5;
